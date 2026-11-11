@@ -7,6 +7,203 @@ Repo lưu topology Cisco Packet Tracer và tài liệu triển khai của nhóm.
 
 Nếu Packet Tracer hỏi cập nhật script cho bốn camera khi mở file, chọn **Yes** rồi lưu bản làm việc riêng. Các giá trị dạng `<ENABLE_SECRET>`, `<RADIUS_SHARED_SECRET>` và các placeholder tương tự cần được thay bằng thông tin lab do nhóm thống nhất trước khi áp dụng cấu hình. Với RADIUS và VPN, hai đầu phải dùng giá trị tương ứng giống nhau.
 
+## Quy hoạch VLAN, IP và cổng
+
+[Sheet quy hoạch gốc](https://claude.ai/artifact/8rpZGDr5M7z7Wm1azx1zty#sheet-sht_2sjmn9tr6d.0)
+
+Các bảng bên dưới được trích từ cấu hình CLI, bảng DHCP và sơ đồ nối dây trong NT113. Chưa đối chiếu từng ô với sheet gốc. Tất cả địa chỉ và dịch vụ bên dưới thuộc mô phỏng Packet Tracer.
+
+### Subnet và VLAN
+
+| Khối | VLAN | Mục đích | Subnet | Gateway HSRP | IP hai DSW | Dải DHCP |
+|---|---:|---|---|---|---|---|
+| A | 10 | Ban giám hiệu và hành chính | `10.1.10.0/24` | `10.1.10.1` | `10.1.10.2` / `10.1.10.3` | `10.1.10.11` – `10.1.10.254` |
+| A | 20 | Giảng viên | `10.1.20.0/24` | `10.1.20.1` | `10.1.20.2` / `10.1.20.3` | `10.1.20.11` – `10.1.20.254` |
+| A | 30 | Wi-Fi sinh viên | `10.20.0.0/19` | `10.20.0.1` | `10.20.0.2` / `10.20.0.3` | `10.20.0.11` – `10.20.31.254` |
+| A | 50 | Máy chủ nội bộ | `10.1.50.0/24` | `10.1.50.1` | `10.1.50.2` / `10.1.50.3` | IP tĩnh |
+| A | 60 | Camera | `10.1.60.0/24` | `10.1.60.1` | `10.1.60.2` / `10.1.60.3` | `10.1.60.11` – `10.1.60.254` |
+| A | 99 | Quản trị | `10.1.99.0/24` | `10.1.99.1` | `10.1.99.2` / `10.1.99.3` | IP tĩnh |
+| B | 20 | Giảng viên | `10.2.20.0/24` | `10.2.20.1` | `10.2.20.2` / `10.2.20.3` | `10.2.20.11` – `10.2.20.254` |
+| B | 60 | Camera | `10.2.60.0/24` | `10.2.60.1` | `10.2.60.2` / `10.2.60.3` | `10.2.60.11` – `10.2.60.254` |
+| B | 70 | Access point | `10.2.70.0/24` | `10.2.70.1` | `10.2.70.2` / `10.2.70.3` | `10.2.70.11` – `10.2.70.254` |
+| B | 80 | Thư viện | `10.2.80.0/24` | `10.2.80.1` | `10.2.80.2` / `10.2.80.3` | `10.2.80.11` – `10.2.80.254` |
+| B | 99 | Quản trị | `10.2.99.0/24` | `10.2.99.1` | `10.2.99.2` / `10.2.99.3` | IP tĩnh |
+| C | 40 | Phòng lab | `10.3.40.0/23` | `10.3.40.1` | `10.3.40.2` / `10.3.40.3` | `10.3.40.11` – `10.3.41.254` |
+| C | 70 | Access point | `10.3.70.0/24` | `10.3.70.1` | `10.3.70.2` / `10.3.70.3` | `10.3.70.11` – `10.3.70.254` |
+| C | 99 | Quản trị | `10.3.99.0/24` | `10.3.99.1` | `10.3.99.2` / `10.3.99.3` | IP tĩnh |
+| K | 60 | Camera | `10.4.60.0/24` | `10.4.60.1` | `10.4.60.2` / `10.4.60.3` | `10.4.60.11` – `10.4.60.254` |
+| K | 70 | Access point | `10.4.70.0/24` | `10.4.70.1` | `10.4.70.2` / `10.4.70.3` | `10.4.70.11` – `10.4.70.254` |
+| K | 99 | Quản trị | `10.4.99.0/24` | `10.4.99.1` | `10.4.99.2` / `10.4.99.3` | IP tĩnh |
+
+VLAN 999 dành cho cổng bỏ trống và làm native VLAN trên các trunk campus thông thường. Cổng WLC là ngoại lệ, dùng native VLAN 50. Pool DHCP cho AP cung cấp địa chỉ WLC `10.1.50.10`.
+
+| Vùng ngoài campus | Subnet | Gateway hoặc cách cấp IP |
+|---|---|---|
+| DMZ | `10.100.0.0/24` | HSRP VIP `10.100.0.1`, hai router biên dùng `.2` và `.3` |
+| Cơ sở 2 | `10.50.10.0/24` | BR-R1 `10.50.10.1`, BR-SW `10.50.10.2`, DHCP từ `10.50.10.11` |
+| Remote Access VPN | `10.60.0.0/24` | Pool `10.60.0.10` – `10.60.0.110` |
+
+### IP thiết bị và dịch vụ
+
+| Thiết bị hoặc interface | Địa chỉ | Gateway hoặc ghi chú |
+|---|---|---|
+| DHCP-DNS | `10.1.50.5/24` | `10.1.50.1` |
+| RADIUS | `10.1.50.6/24` | `10.1.50.1` |
+| PORTAL-NB | `10.1.50.7/24` | `10.1.50.1` |
+| WLC1 management | `10.1.50.10/24` | `10.1.50.1`, VLAN 50 |
+| WLC1 vlan30 | `10.20.0.10/19` | `10.20.0.1`, SSID `UIT-SV` |
+| WEB / LMS / E-LIB | `10.100.0.10/24` / `10.100.0.11/24` / `10.100.0.12/24` | `10.100.0.1` |
+| PC-Remote | `113.161.2.2/30` | `113.161.2.1` |
+| ASW-A1 / ASW-A2 | `10.1.99.11/24` / `10.1.99.12/24` | `10.1.99.1` |
+| ASW-B1 / ASW-B2 | `10.2.99.11/24` / `10.2.99.12/24` | `10.2.99.1` |
+| ASW-C1 / ASW-C2 | `10.3.99.11/24` / `10.3.99.12/24` | `10.3.99.1` |
+| ASW-K1 / ASW-K2 | `10.4.99.11/24` / `10.4.99.12/24` | `10.4.99.1` |
+| SRV-SW | `10.1.99.13/24` | `10.1.99.1` |
+
+<details>
+<summary>Loopback và IP các đường định tuyến</summary>
+
+| Đầu A | IP A | Đầu B | IP B |
+|---|---|---|---|
+| CORE-SW1 Port-channel1 | `10.255.0.1/30` | CORE-SW2 Port-channel1 | `10.255.0.2/30` |
+| ISP-Viettel GigabitEthernet0/0 | `203.113.1.1/30` | EDGE-R1 GigabitEthernet0/0 | `203.113.1.2/30` |
+| ISP-VNPT GigabitEthernet0/0 | `113.161.1.1/30` | EDGE-R2 GigabitEthernet0/0 | `113.161.1.2/30` |
+| ISP-Viettel GigabitEthernet0/1 | `100.64.0.1/30` | ISP-VNPT GigabitEthernet0/1 | `100.64.0.2/30` |
+| ISP-Viettel GigabitEthernet0/2 | `203.113.2.1/30` | BR-R1 GigabitEthernet0/0 | `203.113.2.2/30` |
+| ISP-VNPT GigabitEthernet0/2 | `113.161.2.1/30` | PC-Remote FastEthernet0 | `113.161.2.2/30` |
+| EDGE-R1 GigabitEthernet0/1 | `10.255.3.1/30` | CORE-SW1 GigabitEthernet1/0/21 | `10.255.3.2/30` |
+| EDGE-R2 GigabitEthernet0/1 | `10.255.3.5/30` | CORE-SW2 GigabitEthernet1/0/21 | `10.255.3.6/30` |
+| CORE-SW1 GigabitEthernet1/0/1 | `10.255.1.1/30` | DSW-A1 GigabitEthernet1/0/1 | `10.255.1.2/30` |
+| CORE-SW2 GigabitEthernet1/0/1 | `10.255.2.1/30` | DSW-A1 GigabitEthernet1/0/2 | `10.255.2.2/30` |
+| CORE-SW1 GigabitEthernet1/0/2 | `10.255.1.5/30` | DSW-A2 GigabitEthernet1/0/1 | `10.255.1.6/30` |
+| CORE-SW2 GigabitEthernet1/0/2 | `10.255.2.5/30` | DSW-A2 GigabitEthernet1/0/2 | `10.255.2.6/30` |
+| CORE-SW1 GigabitEthernet1/0/3 | `10.255.1.9/30` | DSW-B1 GigabitEthernet1/0/1 | `10.255.1.10/30` |
+| CORE-SW2 GigabitEthernet1/0/3 | `10.255.2.9/30` | DSW-B1 GigabitEthernet1/0/2 | `10.255.2.10/30` |
+| CORE-SW1 GigabitEthernet1/0/4 | `10.255.1.13/30` | DSW-B2 GigabitEthernet1/0/1 | `10.255.1.14/30` |
+| CORE-SW2 GigabitEthernet1/0/4 | `10.255.2.13/30` | DSW-B2 GigabitEthernet1/0/2 | `10.255.2.14/30` |
+| CORE-SW1 GigabitEthernet1/0/5 | `10.255.1.17/30` | DSW-C1 GigabitEthernet1/0/1 | `10.255.1.18/30` |
+| CORE-SW2 GigabitEthernet1/0/5 | `10.255.2.17/30` | DSW-C1 GigabitEthernet1/0/2 | `10.255.2.18/30` |
+| CORE-SW1 GigabitEthernet1/0/6 | `10.255.1.21/30` | DSW-C2 GigabitEthernet1/0/1 | `10.255.1.22/30` |
+| CORE-SW2 GigabitEthernet1/0/6 | `10.255.2.21/30` | DSW-C2 GigabitEthernet1/0/2 | `10.255.2.22/30` |
+| CORE-SW1 GigabitEthernet1/0/7 | `10.255.1.25/30` | DSW-K1 GigabitEthernet1/0/1 | `10.255.1.26/30` |
+| CORE-SW2 GigabitEthernet1/0/7 | `10.255.2.25/30` | DSW-K1 GigabitEthernet1/0/2 | `10.255.2.26/30` |
+| CORE-SW1 GigabitEthernet1/0/8 | `10.255.1.29/30` | DSW-K2 GigabitEthernet1/0/1 | `10.255.1.30/30` |
+| CORE-SW2 GigabitEthernet1/0/8 | `10.255.2.29/30` | DSW-K2 GigabitEthernet1/0/2 | `10.255.2.30/30` |
+
+| Thiết bị | Loopback0 |
+|---|---|
+| CORE-SW1 | `10.255.255.1/32` |
+| CORE-SW2 | `10.255.255.2/32` |
+| DSW-A1 | `10.255.255.21/32` |
+| DSW-A2 | `10.255.255.22/32` |
+| DSW-B1 | `10.255.255.23/32` |
+| DSW-B2 | `10.255.255.24/32` |
+| DSW-C1 | `10.255.255.25/32` |
+| DSW-C2 | `10.255.255.26/32` |
+| DSW-K1 | `10.255.255.27/32` |
+| DSW-K2 | `10.255.255.28/32` |
+| ISP-Viettel | `8.8.8.8/32` |
+| ISP-VNPT | `1.1.1.1/32` |
+| EDGE-R1 | `10.255.255.11/32` |
+| EDGE-R2 | `10.255.255.12/32` |
+
+</details>
+
+### Cổng và VLAN
+
+Các cặp Core–Core dùng EtherChannel L3 trên Gi1/0/23–24. Các cặp DSW cùng khối dùng EtherChannel L2 trên Gi1/0/3–4. Uplink DSW–Core dùng cổng định tuyến.
+
+<details>
+<summary>Bảng 81 kết nối vật lý</summary>
+
+| Thiết bị A | Cổng A | Thiết bị B | Cổng B | Cấu hình cổng |
+|---|---|---|---|---|
+| ASW-A1 | `FastEthernet0/1` | PC-BGH | `FastEthernet0` | Access VLAN 10 |
+| ASW-A1 | `FastEthernet0/2` | PC-HanhChinh | `FastEthernet0` | Access VLAN 10 |
+| ASW-A2 | `FastEthernet0/1` | PC-GV-A | `FastEthernet0` | Access VLAN 20 |
+| ASW-A2 | `FastEthernet0/2` | CAM-A | `FastEthernet0` | Access VLAN 60 |
+| ASW-B1 | `FastEthernet0/1` | PC-GV-B | `FastEthernet0` | Access VLAN 20 |
+| ASW-B1 | `FastEthernet0/2` | LAP-B1 | `GigabitEthernet0` | Access VLAN 70 |
+| ASW-B2 | `FastEthernet0/1` | LAP-B2 | `GigabitEthernet0` | Access VLAN 70 |
+| ASW-B2 | `FastEthernet0/2` | CAM-B | `FastEthernet0` | Access VLAN 60 |
+| ASW-B2 | `FastEthernet0/3` | PC-ThuVien | `FastEthernet0` | Access VLAN 80 |
+| ASW-C1 | `FastEthernet0/1` | PC-Lab1 | `FastEthernet0` | Access VLAN 40 |
+| ASW-C1 | `FastEthernet0/2` | PC-Lab2 | `FastEthernet0` | Access VLAN 40 |
+| ASW-C1 | `FastEthernet0/3` | LAP-C1 | `GigabitEthernet0` | Access VLAN 70 |
+| ASW-C2 | `FastEthernet0/1` | PC-Lab3 | `FastEthernet0` | Access VLAN 40 |
+| ASW-C2 | `FastEthernet0/2` | PC-Lab4 | `FastEthernet0` | Access VLAN 40 |
+| ASW-K1 | `FastEthernet0/1` | LAP-K1 | `GigabitEthernet0` | Access VLAN 70 |
+| ASW-K1 | `FastEthernet0/2` | CAM-K1 | `FastEthernet0` | Access VLAN 60 |
+| ASW-K2 | `FastEthernet0/1` | LAP-K2 | `GigabitEthernet0` | Access VLAN 70 |
+| ASW-K2 | `FastEthernet0/2` | CAM-K2 | `FastEthernet0` | Access VLAN 60 |
+| ISP-Viettel | `GigabitEthernet0/0` | EDGE-R1 | `GigabitEthernet0/0` | L3 `203.113.1.0/30` |
+| ISP-VNPT | `GigabitEthernet0/0` | EDGE-R2 | `GigabitEthernet0/0` | L3 `113.161.1.0/30` |
+| ISP-Viettel | `GigabitEthernet0/1` | ISP-VNPT | `GigabitEthernet0/1` | L3 `100.64.0.0/30` |
+| ISP-Viettel | `GigabitEthernet0/2` | BR-R1 | `GigabitEthernet0/0` | L3 `203.113.2.0/30` |
+| ISP-VNPT | `GigabitEthernet0/2` | PC-Remote | `FastEthernet0` | L3 `113.161.2.0/30` |
+| BR-R1 | `GigabitEthernet0/1` | BR-SW | `GigabitEthernet0/1` | — |
+| EDGE-R1 | `GigabitEthernet0/1` | CORE-SW1 | `GigabitEthernet1/0/21` | L3 `10.255.3.0/30` |
+| EDGE-R2 | `GigabitEthernet0/1` | CORE-SW2 | `GigabitEthernet1/0/21` | L3 `10.255.3.4/30` |
+| EDGE-R1 | `GigabitEthernet0/2` | DMZ-SW | `GigabitEthernet0/1` | — |
+| EDGE-R2 | `GigabitEthernet0/2` | DMZ-SW | `GigabitEthernet0/2` | — |
+| CORE-SW1 | `GigabitEthernet1/0/23` | CORE-SW2 | `GigabitEthernet1/0/23` | — |
+| CORE-SW1 | `GigabitEthernet1/0/24` | CORE-SW2 | `GigabitEthernet1/0/24` | — |
+| CORE-SW1 | `GigabitEthernet1/0/1` | DSW-A1 | `GigabitEthernet1/0/1` | L3 `10.255.1.0/30` |
+| CORE-SW2 | `GigabitEthernet1/0/1` | DSW-A1 | `GigabitEthernet1/0/2` | L3 `10.255.2.0/30` |
+| CORE-SW1 | `GigabitEthernet1/0/2` | DSW-A2 | `GigabitEthernet1/0/1` | L3 `10.255.1.4/30` |
+| CORE-SW2 | `GigabitEthernet1/0/2` | DSW-A2 | `GigabitEthernet1/0/2` | L3 `10.255.2.4/30` |
+| DSW-A1 | `GigabitEthernet1/0/3` | DSW-A2 | `GigabitEthernet1/0/3` | Trunk |
+| DSW-A1 | `GigabitEthernet1/0/4` | DSW-A2 | `GigabitEthernet1/0/4` | Trunk |
+| DSW-A1 | `GigabitEthernet1/0/5` | ASW-A1 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 10,20,60,99 |
+| DSW-A1 | `GigabitEthernet1/0/6` | ASW-A2 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 10,20,60,99 |
+| DSW-A2 | `GigabitEthernet1/0/5` | ASW-A1 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 10,20,60,99 |
+| DSW-A2 | `GigabitEthernet1/0/6` | ASW-A2 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 10,20,60,99 |
+| CORE-SW1 | `GigabitEthernet1/0/3` | DSW-B1 | `GigabitEthernet1/0/1` | L3 `10.255.1.8/30` |
+| CORE-SW2 | `GigabitEthernet1/0/3` | DSW-B1 | `GigabitEthernet1/0/2` | L3 `10.255.2.8/30` |
+| CORE-SW1 | `GigabitEthernet1/0/4` | DSW-B2 | `GigabitEthernet1/0/1` | L3 `10.255.1.12/30` |
+| CORE-SW2 | `GigabitEthernet1/0/4` | DSW-B2 | `GigabitEthernet1/0/2` | L3 `10.255.2.12/30` |
+| DSW-B1 | `GigabitEthernet1/0/3` | DSW-B2 | `GigabitEthernet1/0/3` | Trunk |
+| DSW-B1 | `GigabitEthernet1/0/4` | DSW-B2 | `GigabitEthernet1/0/4` | Trunk |
+| DSW-B1 | `GigabitEthernet1/0/5` | ASW-B1 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 20,60,70,80,99 |
+| DSW-B1 | `GigabitEthernet1/0/6` | ASW-B2 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 20,60,70,80,99 |
+| DSW-B2 | `GigabitEthernet1/0/5` | ASW-B1 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 20,60,70,80,99 |
+| DSW-B2 | `GigabitEthernet1/0/6` | ASW-B2 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 20,60,70,80,99 |
+| CORE-SW1 | `GigabitEthernet1/0/5` | DSW-C1 | `GigabitEthernet1/0/1` | L3 `10.255.1.16/30` |
+| CORE-SW2 | `GigabitEthernet1/0/5` | DSW-C1 | `GigabitEthernet1/0/2` | L3 `10.255.2.16/30` |
+| CORE-SW1 | `GigabitEthernet1/0/6` | DSW-C2 | `GigabitEthernet1/0/1` | L3 `10.255.1.20/30` |
+| CORE-SW2 | `GigabitEthernet1/0/6` | DSW-C2 | `GigabitEthernet1/0/2` | L3 `10.255.2.20/30` |
+| DSW-C1 | `GigabitEthernet1/0/3` | DSW-C2 | `GigabitEthernet1/0/3` | Trunk |
+| DSW-C1 | `GigabitEthernet1/0/4` | DSW-C2 | `GigabitEthernet1/0/4` | Trunk |
+| DSW-C1 | `GigabitEthernet1/0/5` | ASW-C1 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 40,70,99 |
+| DSW-C1 | `GigabitEthernet1/0/6` | ASW-C2 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 40,70,99 |
+| DSW-C2 | `GigabitEthernet1/0/5` | ASW-C1 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 40,70,99 |
+| DSW-C2 | `GigabitEthernet1/0/6` | ASW-C2 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 40,70,99 |
+| CORE-SW1 | `GigabitEthernet1/0/7` | DSW-K1 | `GigabitEthernet1/0/1` | L3 `10.255.1.24/30` |
+| CORE-SW2 | `GigabitEthernet1/0/7` | DSW-K1 | `GigabitEthernet1/0/2` | L3 `10.255.2.24/30` |
+| CORE-SW1 | `GigabitEthernet1/0/8` | DSW-K2 | `GigabitEthernet1/0/1` | L3 `10.255.1.28/30` |
+| CORE-SW2 | `GigabitEthernet1/0/8` | DSW-K2 | `GigabitEthernet1/0/2` | L3 `10.255.2.28/30` |
+| DSW-K1 | `GigabitEthernet1/0/3` | DSW-K2 | `GigabitEthernet1/0/3` | Trunk |
+| DSW-K1 | `GigabitEthernet1/0/4` | DSW-K2 | `GigabitEthernet1/0/4` | Trunk |
+| DSW-K1 | `GigabitEthernet1/0/5` | ASW-K1 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 60,70,99 |
+| DSW-K1 | `GigabitEthernet1/0/6` | ASW-K2 | `GigabitEthernet0/1` | Trunk, native 999, cho phép 60,70,99 |
+| DSW-K2 | `GigabitEthernet1/0/5` | ASW-K1 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 60,70,99 |
+| DSW-K2 | `GigabitEthernet1/0/6` | ASW-K2 | `GigabitEthernet0/2` | Trunk, native 999, cho phép 60,70,99 |
+| DSW-A1 | `GigabitEthernet1/0/7` | SRV-SW | `GigabitEthernet0/1` | Trunk, native 999, cho phép 30,50,99 |
+| DSW-A2 | `GigabitEthernet1/0/7` | SRV-SW | `GigabitEthernet0/2` | Trunk, native 999, cho phép 30,50,99 |
+| SRV-SW | `FastEthernet0/1` | DHCP-DNS | `FastEthernet0` | Access VLAN 50 |
+| SRV-SW | `FastEthernet0/2` | RADIUS | `FastEthernet0` | Access VLAN 50 |
+| SRV-SW | `FastEthernet0/3` | PORTAL-NB | `FastEthernet0` | Access VLAN 50 |
+| SRV-SW | `FastEthernet0/4` | WLC1 | `GigabitEthernet1` | Trunk, native 50, cho phép 30,50 |
+| DMZ-SW | `FastEthernet0/1` | WEB | `FastEthernet0` | — |
+| DMZ-SW | `FastEthernet0/2` | LMS | `FastEthernet0` | — |
+| DMZ-SW | `FastEthernet0/3` | E-LIB | `FastEthernet0` | — |
+| BR-SW | `FastEthernet0/1` | PC-BR1 | `FastEthernet0` | — |
+| BR-SW | `FastEthernet0/2` | PC-BR2 | `FastEthernet0` | — |
+
+</details>
+
+---
+
 ## Phân công và triển khai
 
 Nguồn số liệu duy nhất: Sheet **"Quy hoạch VLAN & IP – Mạng Campus (Đề tài 1)"** (tab *Subnet*, *IP thiết bị*, *Cổng & VLAN*). Thấy sai IP/VLAN thì sửa trên Sheet trước, rồi sửa cấu hình.

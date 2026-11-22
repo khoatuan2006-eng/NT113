@@ -26,8 +26,8 @@
 | 1.2 | ASW-K1: trunk, access, port-security, DHCP snooping, DAI | `ASW-K1.txt` | ✅ Đã tạo |
 | 1.2 | ASW-K2: trunk, access, port-security, DHCP snooping, DAI | `ASW-K2.txt` | ✅ Đã tạo |
 | 1.3 | SRV-SW: trunk lên DSW-A1/A2, access VLAN 50, trunk WLC | `SRV-SW.txt` | ✅ Đã tạo |
-| 1.4 | DHCP-DNS (giao diện) | File master | ⏳ Cần làm trên Packet Tracer |
-| 1.5 | RADIUS, PORTAL-NB (giao diện) | File master | ⏳ Cần làm trên Packet Tracer |
+| 1.4 | DHCP-DNS (giao diện) | File master | Đã config trên Packet Tracer |
+| 1.5 | RADIUS, PORTAL-NB (giao diện) | File master | Đã config trên Packet Tracer |
 | 1.6 | WLC1, AP, smartphone (giao diện) | File master | ⏳ Sau khi Khang xong định tuyến |
 | 1.7 | PC, Camera (giao diện DHCP) | File master | ⏳ Cần làm trên Packet Tracer |
 

@@ -3,6 +3,8 @@
 Repo lưu topology Cisco Packet Tracer và tài liệu triển khai của nhóm.
 
 - [Campus-Topology.pkt](Campus-Topology.pkt) — sơ đồ nền gồm 57 thiết bị và 81 dây nối. Mở bằng Cisco Packet Tracer 9.0.1.
+- [BAN_GIAO_CHO_KHANG.md](BAN_GIAO_CHO_KHANG.md) — 📋 **Biên bản bàn giao và lộ trình thực hiện tiếp theo dành riêng cho Khang**.
+- [configs/README.md](configs/README.md) — Báo cáo hoàn thành các phần việc cấu hình L2 của Khánh.
 - README này chứa phân công, lệnh CLI, thao tác qua giao diện, lịch ghép và bảng nghiệm thu. Thực hiện cấu hình theo phần việc bên dưới.
 
 Nếu Packet Tracer hỏi cập nhật script cho bốn camera khi mở file, chọn **Yes** rồi lưu bản làm việc riêng. Các giá trị dạng `<ENABLE_SECRET>`, `<RADIUS_SHARED_SECRET>` và các placeholder tương tự cần được thay bằng thông tin lab do nhóm thống nhất trước khi áp dụng cấu hình. Với RADIUS và VPN, hai đầu phải dùng giá trị tương ứng giống nhau.

@@ -1,0 +1,81 @@
+! ============================================================
+! DSW-C2 – L2 (Phần của Khánh)
+! Khối C – Phòng thực hành
+! ============================================================
+hostname DSW-C2
+no ip domain-lookup
+enable secret <ENABLE_SECRET>
+service password-encryption
+banner motd #Truy cap trai phep bi cam#
+line console 0
+ logging synchronous
+ exec-timeout 0 0
+ exit
+ip routing
+!
+vtp mode transparent
+vlan 40
+ name PhongThucHanh
+ exit
+vlan 70
+ name AccessPoint
+ exit
+vlan 99
+ name QuanTri
+ exit
+vlan 999
+ name BlackHole
+ exit
+!
+spanning-tree mode rapid-pvst
+spanning-tree vlan 40,70,99 root secondary
+!
+! --- EtherChannel L2 sang DSW-C1 (Gi1/0/3-4, LACP Active) ---
+interface range GigabitEthernet1/0/3-4
+ switchport mode trunk
+ channel-group 1 mode active
+ no shutdown
+ exit
+interface Port-channel1
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 40,70,99
+ exit
+!
+! --- Trunk xuống ASW-C1 (G1/0/5), ASW-C2 (G1/0/6) ---
+interface range GigabitEthernet1/0/5-6
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 40,70,99
+ no shutdown
+ exit
+!
+! --- SVI + HSRP (DSW-C2 = Standby, priority 100) ---
+interface Vlan40
+ ip address 10.3.40.3 255.255.254.0
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 40 ip 10.3.40.1
+ standby 40 priority 100
+ standby 40 preempt
+ no shutdown
+ exit
+interface Vlan70
+ ip address 10.3.70.3 255.255.255.0
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 70 ip 10.3.70.1
+ standby 70 priority 100
+ standby 70 preempt
+ no shutdown
+ exit
+interface Vlan99
+ ip address 10.3.99.3 255.255.255.0
+ standby version 2
+ standby 99 ip 10.3.99.1
+ standby 99 priority 100
+ standby 99 preempt
+ no shutdown
+ exit
+end
+write memory

@@ -1,0 +1,97 @@
+! ============================================================
+! ASW-K1 (Phần của Khánh)
+! Khối K – Kết nối: LAP-K1 (Fa0/1 VLAN70), CAM-K1 (Fa0/2 VLAN60)
+! Uplink: G0/1 → DSW-K1, G0/2 → DSW-K2
+! Quản trị VLAN 99: 10.4.99.11/24, GW 10.4.99.1
+! ============================================================
+hostname ASW-K1
+no ip domain-lookup
+enable secret <ENABLE_SECRET>
+service password-encryption
+banner motd #Truy cap trai phep bi cam#
+line console 0
+ logging synchronous
+ exec-timeout 0 0
+ exit
+interface Vlan1
+ no ip address
+ shutdown
+ exit
+!
+vtp mode transparent
+vlan 60
+ name Camera
+ exit
+vlan 70
+ name AccessPoint
+ exit
+vlan 99
+ name QuanTri
+ exit
+vlan 999
+ name BlackHole
+ exit
+!
+! --- Uplink lên DSW (G0/1 → DSW-K1, G0/2 → DSW-K2) ---
+interface range GigabitEthernet0/1-2
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 60,70,99
+ no shutdown
+ exit
+!
+! --- LAP-K1 (Fa0/1) – VLAN 70 ---
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 70
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ no shutdown
+ exit
+!
+! --- CAM-K1 (Fa0/2) – VLAN 60 ---
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 60
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ no shutdown
+ exit
+!
+! --- Cổng không dùng → VLAN 999, shutdown ---
+interface range FastEthernet0/3-24
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+ exit
+!
+! --- IP quản trị VLAN 99 ---
+interface Vlan99
+ ip address 10.4.99.11 255.255.255.0
+ no shutdown
+ exit
+ip default-gateway 10.4.99.1
+!
+! --- DHCP Snooping ---
+ip dhcp snooping
+ip dhcp snooping vlan 60,70
+no ip dhcp snooping information option
+interface range GigabitEthernet0/1-2
+ ip dhcp snooping trust
+ exit
+!
+! --- DAI (thử; nếu PT báo lỗi thì bỏ khối này) ---
+ip arp inspection vlan 60,70
+interface range GigabitEthernet0/1-2
+ ip arp inspection trust
+ exit
+end
+write memory

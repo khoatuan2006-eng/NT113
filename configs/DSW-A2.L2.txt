@@ -1,0 +1,149 @@
+! ============================================================
+! DSW-A2 – L2 (Phần của Khánh)
+! Khối A – Hiệu bộ
+! ============================================================
+hostname DSW-A2
+no ip domain-lookup
+enable secret <ENABLE_SECRET>
+service password-encryption
+banner motd #Truy cap trai phep bi cam#
+line console 0
+ logging synchronous
+ exec-timeout 0 0
+ exit
+ip routing
+!
+vtp mode transparent
+vlan 10
+ name BGH-HanhChinh
+ exit
+vlan 20
+ name GiangVien
+ exit
+vlan 30
+ name SinhVien-WiFi
+ exit
+vlan 50
+ name MayChu
+ exit
+vlan 60
+ name Camera
+ exit
+vlan 99
+ name QuanTri
+ exit
+vlan 999
+ name BlackHole
+ exit
+!
+spanning-tree mode rapid-pvst
+spanning-tree vlan 10,20,30,50,60,99 root secondary
+!
+! --- EtherChannel L2 sang DSW-A1 (Gi1/0/3-4, LACP Active) ---
+interface range GigabitEthernet1/0/3-4
+ switchport mode trunk
+ channel-group 1 mode active
+ no shutdown
+ exit
+interface Port-channel1
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,50,60,99
+ exit
+!
+! --- Trunk xuống ASW-A1 (G1/0/5), ASW-A2 (G1/0/6) ---
+interface range GigabitEthernet1/0/5-6
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,60,99
+ no shutdown
+ exit
+!
+! --- Trunk xuống SRV-SW (G1/0/7) ---
+interface GigabitEthernet1/0/7
+ switchport mode trunk
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 30,50,99
+ no shutdown
+ exit
+!
+! --- SVI + HSRP (DSW-A2 = Standby, priority 100) ---
+interface Vlan10
+ ip address 10.1.10.3 255.255.255.0
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 10 ip 10.1.10.1
+ standby 10 priority 100
+ standby 10 preempt
+ no shutdown
+ exit
+interface Vlan20
+ ip address 10.1.20.3 255.255.255.0
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 20 ip 10.1.20.1
+ standby 20 priority 100
+ standby 20 preempt
+ no shutdown
+ exit
+interface Vlan30
+ ip address 10.20.0.3 255.255.224.0
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 30 ip 10.20.0.1
+ standby 30 priority 100
+ standby 30 preempt
+ no shutdown
+ exit
+interface Vlan50
+ ip address 10.1.50.3 255.255.255.0
+ standby version 2
+ standby 50 ip 10.1.50.1
+ standby 50 priority 100
+ standby 50 preempt
+ no shutdown
+ exit
+interface Vlan60
+ ip address 10.1.60.3 255.255.255.0
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 60 ip 10.1.60.1
+ standby 60 priority 100
+ standby 60 preempt
+ no shutdown
+ exit
+interface Vlan99
+ ip address 10.1.99.3 255.255.255.0
+ standby version 2
+ standby 99 ip 10.1.99.1
+ standby 99 priority 100
+ standby 99 preempt
+ no shutdown
+ exit
+!
+! --- ACL: Wi-Fi SV không vào BGH-HC và mạng quản trị ---
+ip access-list extended SV-WIFI-IN
+ permit udp any any eq bootps
+ deny ip 10.20.0.0 0.0.31.255 10.1.10.0 0.0.0.255
+ deny ip 10.20.0.0 0.0.31.255 10.1.99.0 0.0.0.255
+ deny ip 10.20.0.0 0.0.31.255 10.2.99.0 0.0.0.255
+ deny ip 10.20.0.0 0.0.31.255 10.3.99.0 0.0.0.255
+ deny ip 10.20.0.0 0.0.31.255 10.4.99.0 0.0.0.255
+ permit ip any any
+ exit
+interface Vlan30
+ ip access-group SV-WIFI-IN in
+ exit
+!
+! --- ACL: Camera chỉ tới vùng máy chủ ---
+ip access-list extended CAM-IN
+ permit udp any any eq bootps
+ permit udp any host 224.0.0.102 eq 1985
+ permit ip 10.1.60.0 0.0.0.255 10.1.50.0 0.0.0.255
+ deny ip any any
+ exit
+interface Vlan60
+ ip access-group CAM-IN in
+ exit
+end
+write memory

@@ -30,6 +30,8 @@ Các kết quả được ghi theo từng phép thử. Chưa chạy lại toàn 
 
 ## 3. Thiết lập và thao tác khi demo
 
+Các file CLI theo thiết bị được liệt kê tại [configs/README.md](configs/README.md#cấu-hình-cli-phần-khang).
+
 - Mở file bằng Packet Tracer 9.0.1 ở chế độ Realtime và chờ các láng giềng OSPF hội tụ.
 - HSRP nhóm 100 dùng tracking WAN với mức giảm mặc định 10 điểm trong mô phỏng. Khi hai WAN hoạt động, EDGE-R1 có ưu tiên 105 và EDGE-R2 có ưu tiên 100.
 - OSPF ưu tiên DSW-A1 cho VLAN 50 và DSW-C1 cho VLAN 40. Chi phí cao hơn trên SVI tương ứng ở switch dự phòng tránh các đường đã ghi nhận mất gói khi kiểm tra.

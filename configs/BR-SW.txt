@@ -1,0 +1,15 @@
+hostname BR-SW
+no ip domain-lookup
+service password-encryption
+banner motd #Truy cap trai phep bi cam#
+line console 0
+ logging synchronous
+ exec-timeout 0 0
+ exit
+interface Vlan1
+ ip address 10.50.10.2 255.255.255.0
+ no shutdown
+ exit
+ip default-gateway 10.50.10.1
+end
+write memory

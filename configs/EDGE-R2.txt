@@ -1,0 +1,60 @@
+hostname EDGE-R2
+no ip domain-lookup
+service password-encryption
+banner motd #Truy cap trai phep bi cam#
+line console 0
+ logging synchronous
+ exec-timeout 0 0
+ exit
+interface GigabitEthernet0/0
+ description WAN VNPT
+ ip address 113.161.1.2 255.255.255.252
+ ip nat outside
+ no shutdown
+ exit
+interface GigabitEthernet0/1
+ description -> CORE-SW2
+ ip address 10.255.3.5 255.255.255.252
+ ip nat inside
+ no shutdown
+ exit
+interface GigabitEthernet0/2
+ description DMZ
+ ip address 10.100.0.3 255.255.255.0
+ ip nat inside
+ standby version 2
+ standby 100 ip 10.100.0.1
+ standby 100 priority 100
+ standby 100 preempt
+ standby 100 track GigabitEthernet0/0
+ no shutdown
+ exit
+interface Loopback0
+ ip address 10.255.255.12 255.255.255.255
+ exit
+!
+ip route 0.0.0.0 0.0.0.0 113.161.1.1
+ip route 10.60.0.0 255.255.255.0 113.161.1.1
+!
+router ospf 1
+ router-id 10.255.255.12
+ passive-interface GigabitEthernet0/2
+ network 10.255.3.4 0.0.0.3 area 0
+ network 10.100.0.0 0.0.0.255 area 0
+ network 10.255.255.12 0.0.0.0 area 0
+ default-information originate
+ redistribute static subnets
+ exit
+!
+! --- PAT nội bộ, miễn NAT cho lưu lượng VPN ---
+access-list 101 deny ip 10.0.0.0 0.255.255.255 10.50.10.0 0.0.0.255
+access-list 101 deny ip 10.0.0.0 0.255.255.255 10.60.0.0 0.0.0.255
+access-list 101 permit ip 10.0.0.0 0.255.255.255 any
+ip nat inside source list 101 interface GigabitEthernet0/0 overload
+!
+! --- NAT tĩnh DMZ ---
+ip nat inside source static 10.100.0.10 113.161.100.2
+ip nat inside source static 10.100.0.11 113.161.100.3
+ip nat inside source static 10.100.0.12 113.161.100.4
+end
+write memory

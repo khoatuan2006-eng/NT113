@@ -1,0 +1,19 @@
+crypto isakmp policy 10
+ encr aes 256
+ hash sha
+ authentication pre-share
+ group 5
+ exit
+crypto isakmp key <SITE_TO_SITE_PSK> address 203.113.2.2
+crypto ipsec transform-set TS esp-aes 256 esp-sha-hmac
+access-list 110 permit ip 10.0.0.0 0.255.255.255 10.50.10.0 0.0.0.255
+crypto map CMAP 10 ipsec-isakmp
+ set peer 203.113.2.2
+ set transform-set TS
+ match address 110
+ exit
+interface GigabitEthernet0/0
+ crypto map CMAP
+ exit
+end
+write memory

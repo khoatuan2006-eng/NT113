@@ -1,0 +1,43 @@
+hostname ISP-VNPT
+no ip domain-lookup
+service password-encryption
+banner motd #Truy cap trai phep bi cam#
+line console 0
+ logging synchronous
+ exec-timeout 0 0
+ exit
+interface GigabitEthernet0/0
+ description -> EDGE-R2
+ ip address 113.161.1.1 255.255.255.252
+ no shutdown
+ exit
+interface GigabitEthernet0/1
+ description -> ISP-Viettel
+ ip address 100.64.0.2 255.255.255.252
+ no shutdown
+ exit
+interface GigabitEthernet0/2
+ description -> PC-Remote
+ ip address 113.161.2.1 255.255.255.252
+ no shutdown
+ exit
+interface Loopback0
+ description Internet gia lap
+ ip address 1.1.1.1 255.255.255.255
+ exit
+!
+ip route 113.161.100.0 255.255.255.248 113.161.1.2
+ip route 203.113.0.0 255.255.0.0 100.64.0.1
+ip route 8.8.8.8 255.255.255.255 100.64.0.1
+ip access-list extended WAN-VPN-POOL-ANTISPOOF
+ deny ip 10.60.0.0 0.0.0.255 any
+ permit ip any any
+ exit
+interface GigabitEthernet0/1
+ ip access-group WAN-VPN-POOL-ANTISPOOF in
+ exit
+interface GigabitEthernet0/2
+ ip access-group WAN-VPN-POOL-ANTISPOOF in
+ exit
+end
+write memory

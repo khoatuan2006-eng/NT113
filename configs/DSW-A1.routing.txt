@@ -1,0 +1,29 @@
+ip routing
+! DSW-A1 – phần định tuyến
+interface GigabitEthernet1/0/1
+ description -> CORE-SW1
+ no switchport
+ ip address 10.255.1.2 255.255.255.252
+ no shutdown
+ exit
+interface GigabitEthernet1/0/2
+ description -> CORE-SW2
+ no switchport
+ ip address 10.255.2.2 255.255.255.252
+ no shutdown
+ exit
+interface Loopback0
+ ip address 10.255.255.21 255.255.255.255
+ exit
+!
+router ospf 1
+ router-id 10.255.255.21
+ passive-interface default
+ no passive-interface GigabitEthernet1/0/1
+ no passive-interface GigabitEthernet1/0/2
+ network 10.255.0.0 0.0.255.255 area 0
+ network 10.1.0.0 0.0.255.255 area 0
+ network 10.20.0.0 0.0.31.255 area 0
+ exit
+end
+write memory

@@ -1,0 +1,16 @@
+ip access-list extended OUTSIDE-IN
+ permit tcp any host 203.113.100.2 eq www
+ permit tcp any host 203.113.100.3 eq www
+ permit tcp any host 203.113.100.4 eq www
+ permit udp host 203.113.2.2 any eq isakmp
+ permit udp host 203.113.2.2 host 203.113.1.2 eq 4500
+ permit esp host 203.113.2.2 any
+ permit tcp any any established
+ permit icmp any any echo-reply
+ deny ip any any
+ exit
+interface GigabitEthernet0/0
+ ip access-group OUTSIDE-IN in
+ exit
+end
+write memory

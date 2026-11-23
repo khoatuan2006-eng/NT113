@@ -1,0 +1,38 @@
+aaa new-model
+aaa authentication login default local
+aaa authentication login VPN-AUTH local
+aaa authorization network VPN-GRP local
+username vpnuser secret <VPN_USER_PASSWORD>
+!
+crypto isakmp policy 20
+ encr aes 256
+ hash sha
+ authentication pre-share
+ group 2
+ exit
+crypto isakmp policy 21
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+ exit
+ip local pool VPN-POOL 10.60.0.10 10.60.0.110
+crypto isakmp client configuration group REMOTE
+ key <REMOTE_GROUP_KEY>
+ pool VPN-POOL
+ exit
+crypto ipsec transform-set TS2 esp-aes 256 esp-sha-hmac
+crypto ipsec transform-set TS128 esp-aes esp-sha-hmac
+crypto dynamic-map DMAP 10
+ set transform-set TS2 TS128
+ reverse-route
+ exit
+crypto map RMAP client authentication list VPN-AUTH
+crypto map RMAP isakmp authorization list VPN-GRP
+crypto map RMAP client configuration address respond
+crypto map RMAP 10 ipsec-isakmp dynamic DMAP
+interface GigabitEthernet0/0
+ crypto map RMAP
+ exit
+end
+write memory

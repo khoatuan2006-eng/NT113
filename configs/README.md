@@ -259,3 +259,21 @@ Mỗi ASW áp dụng:
 | Ngày 3 | 6.1-C | DHCP và thiết bị đầu cuối | ⬜ |
 | Ngày 4 | 6.1-D | Wi-Fi | ⬜ |
 | Ngày 4 | 6.1-E | ACL và HSRP failover | ⬜ |
+
+
+## Cấu hình CLI phần Khang
+
+Các file dưới đây được tổng hợp từ mục 2 của README và các điều chỉnh đã kiểm tra trong [bản Packet Tracer](../NT113_Khang.pkt). Chúng là lệnh triển khai theo thiết bị. Bản bàn giao và kết quả nghiệm thu nằm trong [biên bản phần Khang](../BAN_GIAO_PHAN_KHANG.md).
+
+| Nhóm | File theo thiết bị |
+|---|---|
+| Core | [CORE-SW1](CORE-SW1.txt), [CORE-SW2](CORE-SW2.txt) |
+| Định tuyến DSW | [A1](DSW-A1.routing.txt), [A2](DSW-A2.routing.txt), [B1](DSW-B1.routing.txt), [B2](DSW-B2.routing.txt), [C1](DSW-C1.routing.txt), [C2](DSW-C2.routing.txt), [K1](DSW-K1.routing.txt), [K2](DSW-K2.routing.txt) |
+| ISP | [Viettel](ISP-Viettel.txt), [VNPT](ISP-VNPT.txt) |
+| Router biên | [EDGE-R1](EDGE-R1.txt), [EDGE-R2](EDGE-R2.txt) |
+| VPN và cơ sở 2 | [EDGE-R1 IPsec](EDGE-R1.vpn.txt), [EDGE-R2 Easy VPN](EDGE-R2.vpn.txt), [BR-R1](BR-R1.txt), [BR-SW](BR-SW.txt) |
+| ACL biên | [EDGE-R1](EDGE-R1.acl.txt), [EDGE-R2](EDGE-R2.acl.txt) |
+
+Vào chế độ `configure terminal` trước khi áp từng file. Các file định tuyến DSW áp sau file L2 tương ứng. Bật `securityk9`, lưu và reload EDGE-R1, EDGE-R2 và BR-R1 trước khi áp phần crypto. Trong Packet Tracer, nếu gói đang ở trạng thái `disable`, gỡ trạng thái đó trước khi bật gói. Điền các placeholder VPN bằng thông tin lab trao đổi riêng. Sau khi đã kiểm tra định tuyến và VPN, áp các file ACL biên. Bộ lọc chống giả mạo nguồn của ISP-VNPT nằm trong file cấu hình ISP.
+
+IP và HTTP của các máy chủ DMZ, các bản ghi DNS cùng cấu hình IP/VPN của PC được thao tác trong giao diện Packet Tracer và lưu trong file mô phỏng.

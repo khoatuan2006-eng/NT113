@@ -2,6 +2,8 @@
 
 Repo lưu topology Cisco Packet Tracer và tài liệu triển khai của nhóm.
 
+- [NT113_Khang.pkt](NT113_Khang.pkt) – Bản Packet Tracer 9.0.1 đã ghép phần Khang.
+- [BAN_GIAO_PHAN_KHANG.md](BAN_GIAO_PHAN_KHANG.md) – Biên bản bàn giao, kết quả kiểm tra và cách chạy demo phần Khang.
 - [Campus-Topology.pkt](Campus-Topology.pkt) — sơ đồ nền gồm 57 thiết bị và 81 dây nối. Mở bằng Cisco Packet Tracer 9.0.1.
 - [BAN_GIAO_CHO_KHANG.md](BAN_GIAO_CHO_KHANG.md) — 📋 **Biên bản bàn giao và lộ trình thực hiện tiếp theo dành riêng cho Khang**.
 - [configs/README.md](configs/README.md) — Báo cáo hoàn thành các phần việc cấu hình L2 của Khánh.
